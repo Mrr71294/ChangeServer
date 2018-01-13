@@ -14,7 +14,7 @@ const passport = require('passport');
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const LocalStrategy = require("passport-local").Strategy;
-
+require('dotenv').config();
 
 const database = require('./config/mongoDB');
 require('./config/passport');
