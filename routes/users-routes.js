@@ -11,6 +11,7 @@ router.post('/signup', (req, res, next) => {
 
   const email = req.body.email;
   const password = req.body.password;
+  const name = req.body.name;
 
   //if nothing entered, promt an entry.
   if (!email || !password) {
@@ -30,6 +31,7 @@ router.post('/signup', (req, res, next) => {
     const theUser = new User({
       email: email,
       password: hashPass,
+      name : name
     });
     //Save to the database and return a message on error.
     theUser.save((err) => {

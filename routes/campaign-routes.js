@@ -10,12 +10,11 @@ router.post('/create', (req, res, next) => {
     image: req.body.image,
     summary: req.body.summary,
     goal: req.body.goal,
-    organizations: req.body.organizations,
     events:req.body.events,
     donations: req.body.donations,
     active: req.body.active,
   });
-  theCampaign.save((err => {
+  theCampaign.save((err) => {
     if(err) {
       res.json(err);
       return;
@@ -24,7 +23,7 @@ router.post('/create', (req, res, next) => {
       message: 'New Campaign Created',
       theCampaign
     });
-  }));
+  });
 });
 
 //Return all campaigns///////////////////////////////////////////////////////////////
@@ -39,7 +38,7 @@ router.get('/findAll', (req, res, next) => {
 });//get/findAllCampaigns
 
 //Return a single campaign////////////////////////////////////////////////////////
-router.get('/findOne:id', (req, res) => {
+router.get('/findOne/:id', (req, res) => {
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
     return;

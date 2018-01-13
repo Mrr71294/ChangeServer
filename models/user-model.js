@@ -10,8 +10,7 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
-  firstName: String,
-  lastName: String,
+  name: String,
   image: {
     type: String,
     default: ''

@@ -9,10 +9,6 @@ const campaignSchema = new Schema({
   },
   summary: String,
   goal: String,
-  // organizations: {
-  //   type: Array,
-  //   deafult: ''
-  // },
   events:{
     type: Array,
     deafult: ''
