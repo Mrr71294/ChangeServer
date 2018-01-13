@@ -17,12 +17,13 @@ const LocalStrategy = require("passport-local").Strategy;
 
 
 const database = require('./config/mongoDB');
+require('./config/passport');
+
 const app = express();
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 //Middleware///////////////////////////////////////////////////////////////////
-app.use(cors());
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -35,11 +36,19 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors({
+  credentials: true,                   // allow other domains to send cookies
+  origin: [ 'http://localhost:4200' ]  // these are the domains that are allowed
+}));
 
+//Routes////////////////////////////////////////////////////////////////////////
 app.use('/api/user', users);
 app.use('/api/campaign', campaign);
 app.use('/api/event', event);
-app.use('/', index);
 
+app.use((req, res, next) => {
+    // If no routes match, send them the Angular HTML.
+    res.sendFile(__dirname + '/public/index.html');
+});
 
 module.exports = app;

@@ -7,132 +7,100 @@ const router     = express.Router();
 
 
 // //Create new user and add them to the database////////////////////////////////////
-// router.post('/signup', (req, res, next) => {
-//   const email = req.body.email; //email from the user model (schema) = email from the form that user fills
-//   const password = req.body.password; //password from form.
-//
-//   if(!email || !password) {
-//     res.status(400).json({ message: 'Provide email and password'});
-//     return ;
-//   }
-//   //See if the email is already taken(query the database)
-//   User.findOne({ email : email}, '_id', (err, foundUser) => {
-//     if(foundUser) {
-//       res.status(400).json({message: 'That email already exists.'});
-//       return ;
-//     }
-//     //save the user to the database if its avalible
-//     const salt = bcrypt.genSaltSync(10);
-//     const hashPass = bcrypt.hashSync(password, salt);
-//
-//     const newUser = new User({
-//       email: email,
-//       password: hashPass
-//     });
-//     newUser.save((err) => {
-//       if (err) {
-//         res.status(500).json({message: 'something went wrong'});
-//         return;
-//       }
-//       req.login(newUser, (err) => {
-//         res.status(200).json(newUser);
-//         return ;
-//       });
-//     });//theUser.save
-//   });//user.findOne()
-// });//Post/signup
 router.post('/signup', (req, res, next) => {
+
   const email = req.body.email;
   const password = req.body.password;
 
+  //if nothing entered, promt an entry.
   if (!email || !password) {
-    res.status(400).json({ message: 'Provide email and password' });
+    res.status(400).json({message: 'Provide the email and password.'});
     return;
   }
 
-  User.findOne({ email }, '_id', (err, foundUser) => {
-    if (foundUser) {
-      res.status(400).json({ message: 'The email already exists' });
+  // See if the user is already taken (query the database)
+  User.findOne({ email: email }, '_id', (err, foundUser) => {
+    if (foundUser){
+      res.status(400).json({message: 'The email already exists. Try another one.'});
       return;
     }
-
-    const salt     = bcrypt.genSaltSync(10);
+    //hash the password and assign email and hashpass to theUser object.
+    const salt = bcrypt.genSaltSync(10);
     const hashPass = bcrypt.hashSync(password, salt);
-
     const theUser = new User({
-      email,
-      password: hashPass
+      email: email,
+      password: hashPass,
     });
-
+    //Save to the database and return a message on error.
     theUser.save((err) => {
-      if (err) {
-        res.status(500).json({ message: 'Something went wrong' });
+      if (err){
+        res.status(500).json({message: 'Opps, something went wrong when creating your account, please try agian.'});
         return;
       }
-
+      // Logins the user after successful account creation
       req.login(theUser, (err) => {
-        if (err) {
-          res.status(500).json({ message: 'Something went wrong' });
+        if (err){
+          res.status(500).json({message: 'Opps, something went wrong. Please try again.'});
           return;
         }
-        res.status(200).json(req.user);
+        theUser.password = undefined; // Hides user's password from response. Only shows in database.
+        res.status(200).json(theUser); // Displays the user acount info in a server 200 res
       });
-    });
-  });
-});
+    }); // closes theUser.save()
+  }); // closes User.findOne()
+}); // closes GET /signup
 
 // //Log in an existing user//////////////////////////////////////////////////////////
-// router.post('/login', (req, res, next) => {
-//   const email = req.body.email;
-//   const password = req.body.password;
-//
-//   //see if the email credential is saveUninitialized
-//   User.findOne({email:email}, (err, foundUser) => {
-//     //send error if no user with that email
-//     if (foundUser === null){
-//       res.status(400).json({message: 'Incorrect email'});
-//       return;
-//     }
-//     //send an error if password is wrong
-//     if(!bcrypt.compareSync(password, foundUser.password)) {
-//       res.status(400).json({ message: 'Incorrect password'});
-//       return;
-//     }
-//     //if we get here we are good and log in user
-//     req.login(foundUser, (err) => {
-//       res.status(200).json(foundUser);
-//     });
-//   });//User.findOne()
-// });//Post/login
-
 router.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, theUser, failureDetails) => {
-    if (err) {
-      res.status(500).json({ message: 'Something went wrong' });
+  const email = req.body.email;
+  const password = req.body.password;
+
+  // query accounts by email entered
+  User.findOne({email: email}, (err, foundUser) => {
+    // if no email or password entered, promt user to enter info.
+    if (!email || !password ){
+      res.status(400).json({message: 'Please make sure all required fields are filled out correctly.'});
+      return;
+    }
+    //check if email exists and send message if already taken.
+    if (!foundUser) {
+      res.status(400).json({message: 'Email entered does not exist in the database. Please try a different email or sign up for a new account.'});
+      return;
+    }
+    // checks if user's entered password matches the password encrypted with the foundUser
+    if (!bcrypt.compareSync(password, foundUser.password)) {
+      res.status(400).json({message: 'Incorrect password.'});
       return;
     }
 
-    if (!theUser) {
-      res.status(401).json(failureDetails);
+    // log the user in
+    req.login(foundUser, (err) => {
+       // hides the bcrypt password so it doenst return in the response
+      foundUser.password = undefined;
+      // res.status(200).json({message: 'Log in successful!'});
+      res.status(200).json(foundUser);
       return;
-    }
-
-    req.login(theUser, (err) => {
-      if (err) {
-        res.status(500).json({ message: 'Something went wrong' });
-        return;
-      }
-
-      // We are now logged in (notice req.user)
-      res.status(200).json(req.user);
-    });
-  })(req, res, next);
-});
+    });//req.login()
+  }); // User.findOne()
+});// POST /login
 
 //Log out an existing user//////////////////////////////////////////////////////
 router.post('/logout', (req, res, next) => {
   req.logout();
   res.status(200).json({ message: 'Success' });
+});
+
+router.get('/checklogin', (req, res, next) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'Nobody logged in. 🥒' });
+      return;
+    }
+
+    // Clear the encryptedPassword before sending
+    // (not from the database, just from the object)
+    req.user.encryptedPassword = undefined;
+
+    res.status(200).json(req.user);
 });
 
 //Return all users///////////////////////////////////////////////////////////////
