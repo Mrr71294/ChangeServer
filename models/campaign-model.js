@@ -13,10 +13,11 @@ const campaignSchema = new Schema({
     type: Array,
     deafult: ''
   },
-  // donations: {
-  //   type: Number,
-  //   default: 0
-  // },
+  user: {
+  type: Schema.Types.ObjectId,
+  required: true,
+  ref: 'User' // "ref" is the string name of a model that the ID refers to
+},    
   active: Boolean
 }, {
   timestamps:{

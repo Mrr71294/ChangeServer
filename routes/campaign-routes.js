@@ -13,6 +13,7 @@ router.post('/create', (req, res, next) => {
     events:req.body.events,
     donations: req.body.donations,
     active: req.body.active,
+    user: req.user._id
   });
   theCampaign.save((err) => {
     if(err) {
