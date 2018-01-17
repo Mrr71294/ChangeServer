@@ -56,7 +56,7 @@ router.get('/findOne/:id', (req, res) => {
 });
 
 //Edit an existing campaign/////////////////////////////////////////////////////
-router.put('/update:id', (req, res) => {
+router.put('/update/:id', (req, res) => {
   if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
     res.status(400).json({ message: 'Specified id is not valid' });
     return;
@@ -64,13 +64,13 @@ router.put('/update:id', (req, res) => {
 
   const updates = {
     title: req.body.title,
-    image: req.body.image,
+    // image: req.body.image,
     summary: req.body.summary,
     goal: req.body.goal,
-    organizations: req.body.organizations,
-    events:req.body.events,
-    donations: req.body.donations,
-    active: req.body.active,
+    // organizations: req.body.organizations,
+    // events:req.body.events,
+    // donations: req.body.donations,
+    // active: req.body.active,
   };
 
   Campaign.findByIdAndUpdate(req.params.id, updates, (err) => {
