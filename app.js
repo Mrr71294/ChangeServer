@@ -18,7 +18,7 @@ require('dotenv').config();
 
 const database = require('./config/mongoDB');
 require('./config/passport');
-
+console.log("hello World");
 const app = express();
 
 // uncomment after placing your favicon in /public
